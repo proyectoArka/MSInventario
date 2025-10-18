@@ -7,6 +7,7 @@ import com.Arka.MSInventario.infrastructure.adapters.entity.ProductoEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -35,5 +36,30 @@ public class ProductoGatewayImpl implements ProductoGateway {
                 .stream()
                 .map(ProductoEntity::toDomain)
                 .toList();
+    }
+
+    @Override
+    public List<Producto> buscarProductos(String nombre) {
+         List<Producto> productos = new java.util.ArrayList<>(productoRepository.findByNombreContainingIgnoreCase(nombre)
+                 .stream()
+                 .map(ProductoEntity::toDomain)
+                 .toList());
+        // Si se encontraron productos, buscar productos de la misma categoría que el primero
+        Optional<Producto> primerProducto = productos.stream().findFirst();
+        Long categoriaProducto = primerProducto.map(Producto::getCategoria).orElse(null);
+
+        if (categoriaProducto != null) {
+            List<Producto> productosMismaCategoria = productoRepository.findByCategoria_Id(categoriaProducto)
+                    .stream()
+                    .map(ProductoEntity::toDomain)
+                    .toList();
+
+            // Combina ambas listas y elimina duplicados
+            productos.addAll(productosMismaCategoria);
+            productos = productos.stream().distinct().toList();
+        }
+
+        return productos;
+
     }
 }

@@ -1,5 +1,6 @@
 package com.Arka.MSInventario.infrastructure.controller;
 
+import com.Arka.MSInventario.application.dto.ProductoClienteDTO;
 import com.Arka.MSInventario.application.dto.ProductoDTO;
 import com.Arka.MSInventario.domain.model.Producto;
 import com.Arka.MSInventario.domain.model.gateway.ProductoGateway;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/productos/v1")
+@RequestMapping("/api/v1/productos")
 @RequiredArgsConstructor
 public class ProductoController {
     private final ProductoUseCase productoUseCase;
@@ -51,5 +52,21 @@ public class ProductoController {
         } catch (Exception e) {
             return ResponseEntity.status(404).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/buscarProductos/{nombre}")
+    public ResponseEntity<Object> buscarProductos(@PathVariable String nombre){
+        try {
+            List<ProductoClienteDTO> productoDTO = productoUseCase.buscarProductosDTO(nombre);
+            return ResponseEntity.ok(productoDTO);
+        }
+        catch (Exception e){
+            return ResponseEntity.status(500).body("Error interno..." + e.getMessage());
+        }
+    }
+
+    @GetMapping("/hola")
+    public String getUser() {
+        return "Hola desde el controlador de ordenes";
     }
 }

@@ -1,6 +1,8 @@
 package com.Arka.MSInventario.domain.usecase;
 
+import com.Arka.MSInventario.application.dto.ProductoClienteDTO;
 import com.Arka.MSInventario.application.dto.ProductoDTO;
+import com.Arka.MSInventario.domain.model.Categoria;
 import com.Arka.MSInventario.domain.model.HistorialStock;
 import com.Arka.MSInventario.domain.model.Producto;
 import com.Arka.MSInventario.domain.model.exception.Exception;
@@ -135,7 +137,29 @@ public class ProductoUseCase {
         // Obtener el nombre de la categoría usando el id
         dto.setCategoria(
                 categoriaGateway.buscarCategoriaPorId(producto.getCategoria())
-                        .map(categoria -> categoria.getNombre())
+                        .map(Categoria::getNombre)
+                        .orElse("Desconocida")
+        );
+        return dto;
+    }
+
+    public   List<ProductoClienteDTO> buscarProductosDTO(String nombre) {
+        List<Producto> productos = productoGateway.buscarProductos(nombre);
+        return productos.stream()
+                .map(this::toClienteDTO)
+                .collect(Collectors.toList());
+    }
+
+    private ProductoClienteDTO toClienteDTO(Producto producto) {
+        ProductoClienteDTO dto = new ProductoClienteDTO();
+        dto.setNombre(producto.getNombre());
+        dto.setDescripcion(producto.getDescripcion());
+        dto.setPrecio(producto.getPrecio());
+        dto.setStock(producto.getStock());
+        // Obtener el nombre de la categoría usando el id
+        dto.setCategoria(
+                categoriaGateway.buscarCategoriaPorId(producto.getCategoria())
+                        .map(Categoria::getNombre)
                         .orElse("Desconocida")
         );
         return dto;

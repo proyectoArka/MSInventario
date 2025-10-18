@@ -23,4 +23,5 @@ public interface ProductoGateway {
      */
     Optional<Producto> buscarPorNombre(String nombre);
     List<Producto> findAll();
+    List<Producto> buscarProductos(String nombre);
 }

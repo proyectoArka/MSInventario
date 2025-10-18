@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/categoria/v1")
+@RequestMapping("api/v1/categoria")
 @RequiredArgsConstructor
 public class CategoriaController {
     private final CategoriaUseCase categoriaUseCase;
