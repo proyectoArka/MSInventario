@@ -1,7 +1,6 @@
 package com.Arka.MSInventario.infrastructure.adapters.repository;
 
 import com.Arka.MSInventario.infrastructure.adapters.entity.CategoriaEntity;
-import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

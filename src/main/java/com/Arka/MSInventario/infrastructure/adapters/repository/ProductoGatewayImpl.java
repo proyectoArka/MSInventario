@@ -31,7 +31,7 @@ public class ProductoGatewayImpl implements ProductoGateway {
     }
 
     @Override
-    public java.util.List<Producto> findAll() {
+    public List<Producto> findAll() {
         return productoRepository.findAll()
                 .stream()
                 .map(ProductoEntity::toDomain)
@@ -61,5 +61,11 @@ public class ProductoGatewayImpl implements ProductoGateway {
 
         return productos;
 
+    }
+
+    @Override
+    public Optional<Producto> buscarPorId(Long id) {
+        return productoRepository.findById(id)
+                .map(ProductoEntity::toDomain);
     }
 }

@@ -1,7 +1,7 @@
 package com.Arka.MSInventario.domain.usecase;
 
-import com.Arka.MSInventario.application.dto.ProductoClienteDTO;
 import com.Arka.MSInventario.application.dto.ProductoDTO;
+import com.Arka.MSInventario.application.dto.ProductoUpdateDTO;
 import com.Arka.MSInventario.domain.model.Categoria;
 import com.Arka.MSInventario.domain.model.HistorialStock;
 import com.Arka.MSInventario.domain.model.Producto;
@@ -65,61 +65,85 @@ public class ProductoUseCase {
     /**
      * Busca un producto por su nombre.
      *
-     * @param nombre Nombre del producto
+     * @param id Nombre del producto
      * @return Un Optional con el producto si existe, vacío en caso contrario
      */
-    public Optional<Producto> buscarPorNombre(String nombre) {
-        return productoGateway.buscarPorNombre(nombre);
+    public Optional<ProductoDTO> buscarPorId(Long id) {
+        return productoGateway.buscarPorId(id)
+                .map(this::toDTO);
     }
-
     /**
      * Actualiza los datos de un producto existente.
      *
-     * @param nombre Nombre del producto a actualizar
-     * @param producto Datos nuevos del producto
+     * @param id del producto a actualizar
+     * @param productoUpdateDTO Datos nuevos del producto
      * @return El producto actualizado
      * @throws Exception si el producto no existe
      */
-    public Producto actualizarProducto(String nombre, Producto producto) {
-        Optional<Producto> productoExistente = productoGateway.buscarPorNombre(nombre);
+    public Producto actualizarProducto(Long id, ProductoUpdateDTO productoUpdateDTO) {
+        Optional<Producto> productoExistente = productoGateway.buscarPorId(id);
         if (productoExistente.isEmpty()) {
-            throw new Exception("El producto " + nombre + " no existe.");
+            throw new Exception("El producto no existe.");
         }
-        if (producto.getStock() < 0) {
+
+        Producto productoUpdate = productoExistente.get();
+        int stockAnterior = productoUpdate.getStock();
+
+// Si el DTO trae un nuevo nombre, lo actualiza.
+        if (productoUpdateDTO.getNombre() != null) {
+            productoUpdate.setNombre(productoUpdateDTO.getNombre());
+        }
+
+        // Si el DTO trae una nueva descripción, la actualiza.
+        if (productoUpdateDTO.getDescripcion() != null) {
+            productoUpdate.setDescripcion(productoUpdateDTO.getDescripcion());
+        }
+
+        // Repetir el patrón para todos los campos:
+        if (productoUpdateDTO.getPrecio() != null) {
+            productoUpdate.setPrecio(productoUpdateDTO.getPrecio());
+        }
+        if (productoUpdateDTO.getStock() != null) {
+            productoUpdate.setStock(productoUpdateDTO.getStock());
+        }
+        if (productoUpdateDTO.getCategoria() != null) {
+            // Debes validar aquí si la categoría es válida si no lo hiciste en el DTO
+            productoUpdate.setCategoria(productoUpdateDTO.getCategoria());
+        }
+        if (productoUpdateDTO.getUmbralStockBajo() != null) {
+            productoUpdate.setUmbralStockBajo(productoUpdateDTO.getUmbralStockBajo());
+        }
+
+        // 2. REALIZAR VALIDACIONES SOBRE EL OBJETO FINAL
+
+        // Ahora, si la descripción es null, no se invoca getDescripcion()
+        // Si se actualizó la descripción, se valida su longitud.
+        if (productoUpdate.getDescripcion() != null && productoUpdate.getDescripcion().length() > 200) {
+            throw new Exception("La descripcion no puede tener mas de 200 caracteres, tiene: " + productoUpdateDTO.getDescripcion().length());
+        }
+
+        // Si se actualizó el nombre, se valida su longitud.
+        if (productoUpdate.getNombre() != null && productoUpdate.getNombre().length() > 50) {
+            throw new Exception("El nombre no puede tener mas de 50 caracteres, tiene: " + productoUpdateDTO.getNombre().length());
+        }
+
+        // La validación de stock negativo se realiza sobre el valor final
+        if (productoUpdate.getStock() < 0) {
             throw new Exception("El stock no puede ser negativo.");
         }
-        if(producto.getDescripcion().length() > 200){
-            throw new Exception("La descripcion no puede tener mas de 200 caracteres, tiene: " + producto.getDescripcion().length());
+
+        // 3. GUARDAR Y REGISTRAR HISTORIAL
+        Producto productoActualizado = productoGateway.saveProductos(productoUpdate);
+
+        // Lógica para historial de stock (ya la tienes, es correcta)
+        if (productoActualizado.getStock() != stockAnterior) {
+            HistorialStock historial = new HistorialStock();
+            historial.setId_Producto(productoActualizado.getId());
+            historial.setCantidad_nueva(productoActualizado.getStock());
+            historialStockGateway.saveHistorialStock(historial);
         }
-        if(producto.getNombre().length() > 50){
-            throw new Exception("El nombre no puede tener mas de 50 caracteres, tiene: " + producto.getNombre().length());
-        }
-        if(producto.getUmbralStockBajo() < 0){
-            throw new Exception("El umbral de stock bajo no puede ser negativo");
-        }
 
-        int stockAnterior = productoExistente.get().getStock();
-
-        Producto prodToUpdate = productoExistente.get();
-        prodToUpdate.setNombre(producto.getNombre());
-        prodToUpdate.setDescripcion(producto.getDescripcion());
-        prodToUpdate.setPrecio(producto.getPrecio());
-        prodToUpdate.setStock(producto.getStock());
-        prodToUpdate.setCategoria(producto.getCategoria());
-        prodToUpdate.setUmbralStockBajo(producto.getUmbralStockBajo());
-
-
-        Producto ProductoActualizado = productoGateway.saveProductos(prodToUpdate);
-        if (producto.getStock() == stockAnterior) {
-            return ProductoActualizado; // No hay cambio en el stock, no registrar en historial
-        }
-        HistorialStock historial = new HistorialStock();
-
-        historial.setId_Producto(ProductoActualizado.getId());
-        historial.setCantidad_nueva(ProductoActualizado.getStock());
-        historialStockGateway.saveHistorialStock(historial);
-
-        return ProductoActualizado;
+        return productoActualizado;
     }
 
     public List<ProductoDTO> obtenerTodosLosProductosDTO() {
@@ -131,38 +155,42 @@ public class ProductoUseCase {
 
     private ProductoDTO toDTO(Producto producto) {
         ProductoDTO dto = new ProductoDTO();
-        dto.setNombre(producto.getNombre());
-        dto.setDescripcion(producto.getDescripcion());
-        dto.setPrecio(producto.getPrecio());
-        // Obtener el nombre de la categoría usando el id
-        dto.setCategoria(
-                categoriaGateway.buscarCategoriaPorId(producto.getCategoria())
-                        .map(Categoria::getNombre)
-                        .orElse("Desconocida")
+            dto.setNombre(producto.getNombre());
+            dto.setDescripcion(producto.getDescripcion());
+            dto.setPrecio(producto.getPrecio());
+            dto.setId(producto.getId());
+            dto.setStock(producto.getStock());
+            dto.setUmbralStockBajo(producto.getUmbralStockBajo());
+            dto.setCreatedAt(producto.getCreatedAt());
+            // Obtener el nombre de la categoría usando el id
+            dto.setCategoria(
+                    categoriaGateway.buscarCategoriaPorId(producto.getCategoria())
+                            .map(Categoria::getNombre)
+                            .orElse("Desconocida")
         );
         return dto;
     }
 
-    public   List<ProductoClienteDTO> buscarProductosDTO(String nombre) {
+    public   List<ProductoDTO> buscarProductosDTO(String nombre) {
         List<Producto> productos = productoGateway.buscarProductos(nombre);
         return productos.stream()
-                .map(this::toClienteDTO)
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    private ProductoClienteDTO toClienteDTO(Producto producto) {
-        ProductoClienteDTO dto = new ProductoClienteDTO();
-        dto.setNombre(producto.getNombre());
-        dto.setDescripcion(producto.getDescripcion());
-        dto.setPrecio(producto.getPrecio());
-        dto.setStock(producto.getStock());
-        // Obtener el nombre de la categoría usando el id
-        dto.setCategoria(
-                categoriaGateway.buscarCategoriaPorId(producto.getCategoria())
-                        .map(Categoria::getNombre)
-                        .orElse("Desconocida")
-        );
-        return dto;
-    }
+//    private ProductoClienteDTO toClienteDTO(Producto producto) {
+//        ProductoClienteDTO dto = new ProductoClienteDTO();
+//            dto.setNombre(producto.getNombre());
+//            dto.setDescripcion(producto.getDescripcion());
+//            dto.setPrecio(producto.getPrecio());
+//            dto.setStock(producto.getStock());
+//            // Obtener el nombre de la categoría usando el id
+//            dto.setCategoria(
+//                    categoriaGateway.buscarCategoriaPorId(producto.getCategoria())
+//                            .map(Categoria::getNombre)
+//                            .orElse("Desconocida")
+//        );
+//        return dto;
+//    }
 
 }

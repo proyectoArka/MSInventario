@@ -1,9 +1,8 @@
 package com.Arka.MSInventario.infrastructure.controller;
 
-import com.Arka.MSInventario.application.dto.ProductoClienteDTO;
 import com.Arka.MSInventario.application.dto.ProductoDTO;
+import com.Arka.MSInventario.application.dto.ProductoUpdateDTO;
 import com.Arka.MSInventario.domain.model.Producto;
-import com.Arka.MSInventario.domain.model.gateway.ProductoGateway;
 import com.Arka.MSInventario.domain.usecase.ProductoUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,10 +32,10 @@ public class ProductoController {
             return ResponseEntity.status(500).body("Error interno");
         }
     }
-    @GetMapping("/buscar/{nombre}")
-    public ResponseEntity<Object> buscarProducto(@PathVariable String nombre) {
+    @GetMapping("/buscar/{id}")
+    public ResponseEntity<?> buscarProducto(@PathVariable Long id) {
         try {
-            Optional<Producto> producto = productoUseCase.buscarPorNombre(nombre);
+            Optional<ProductoDTO> producto = productoUseCase.buscarPorId(id);
             return producto.<ResponseEntity<Object>>map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.status(404).body("Producto no encontrado"));
         } catch (Exception e) {
@@ -44,10 +43,10 @@ public class ProductoController {
         }
     }
 
-    @PutMapping("/actualizar/{nombre}")
-    public ResponseEntity<Object> actualizarProducto(@PathVariable String nombre, @RequestBody Producto producto) {
+    @PutMapping("/actualizar/{id}")
+    public ResponseEntity<Object> actualizarProducto(@PathVariable Long id, @RequestBody ProductoUpdateDTO productoUpdateDTO) {
         try {
-            Producto productoActualizado = productoUseCase.actualizarProducto(nombre, producto);
+            Producto productoActualizado = productoUseCase.actualizarProducto(id, productoUpdateDTO);
             return ResponseEntity.ok(productoActualizado);
         } catch (Exception e) {
             return ResponseEntity.status(404).body(e.getMessage());
@@ -57,16 +56,11 @@ public class ProductoController {
     @GetMapping("/buscarProductos/{nombre}")
     public ResponseEntity<Object> buscarProductos(@PathVariable String nombre){
         try {
-            List<ProductoClienteDTO> productoDTO = productoUseCase.buscarProductosDTO(nombre);
+            List<ProductoDTO> productoDTO = productoUseCase.buscarProductosDTO(nombre);
             return ResponseEntity.ok(productoDTO);
         }
         catch (Exception e){
             return ResponseEntity.status(500).body("Error interno..." + e.getMessage());
         }
-    }
-
-    @GetMapping("/hola")
-    public String getUser() {
-        return "Hola desde el controlador de ordenes";
     }
 }

@@ -15,7 +15,7 @@ import java.util.Optional;
 public class CategoriaController {
     private final CategoriaUseCase categoriaUseCase;
 
-    @PostMapping("/nuevaCategoria")
+    @PostMapping("/nuevacategoria")
     public ResponseEntity<Categoria> nuevaCategoria(@RequestBody Categoria categoria) {
         Categoria nuevaCategoria = categoriaUseCase.saveCategoria(categoria);
         return ResponseEntity.ok(nuevaCategoria);
