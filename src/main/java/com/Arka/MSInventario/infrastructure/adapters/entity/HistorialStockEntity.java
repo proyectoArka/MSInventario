@@ -37,6 +37,7 @@ public class HistorialStockEntity {
         this.fecha_Cambio = LocalDateTime.now();
     }
 
+    // Constructor para convertir de dominio a entidad
     public HistorialStockEntity(HistorialStock historialStock, ProductoEntity productoEntity) {
         this.id = historialStock.getId();
         this.fecha_Cambio = historialStock.getFecha_Cambio();
@@ -44,6 +45,7 @@ public class HistorialStockEntity {
         this.IdProducto = productoEntity;
     }
 
+    // Metodo para convertir de entidad a dominio
     public HistorialStock toDomain(){
         return new HistorialStock(
                 this.id,

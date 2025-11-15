@@ -36,12 +36,14 @@ public class CategoriaEntity {
         this.createdAt = LocalDateTime.now();
     }
 
+    // Constructor para convertir de dominio a entidad
     public CategoriaEntity (Categoria categoria) {
         this.id = categoria.getId();
         this.nombre = categoria.getNombre();
         this.createdAt = categoria.getCreatedAt();
     }
 
+    // Metodo para convertir de entidad a dominio
     public Categoria toDomain() {
         return new Categoria(
                 this.id,

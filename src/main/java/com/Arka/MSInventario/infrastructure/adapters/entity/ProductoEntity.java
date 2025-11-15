@@ -47,20 +47,12 @@ public class ProductoEntity {
     @OneToMany(mappedBy = "IdProducto", cascade = CascadeType.ALL)
     private List<HistorialStockEntity> historialStock;
 
-
-
-    /**
-     * Asigna la fecha de creación antes de persistir la entidad.
-     */
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
 
-    /**
-     * Constructor que permite crear la entidad a partir del modelo de dominio.
-     * @param producto Objeto de dominio Producto
-     */
+    // Metodo para convertir un objeto de dominio Producto a una entidad ProductoEntity
     public ProductoEntity(Producto producto, CategoriaEntity categoriaEntity) {
         this.id = producto.getId();
         this.nombre = producto.getNombre();
@@ -72,10 +64,7 @@ public class ProductoEntity {
         this.createdAt = producto.getCreatedAt();
     }
 
-    /**
-     * Convierte la entidad a un objeto de dominio Producto.
-     * @return Producto del dominio
-     */
+    // Metodo para convertir una entidad ProductoEntity a un objeto de dominio Producto
     public Producto toDomain() {
         return new Producto(
                 id,
