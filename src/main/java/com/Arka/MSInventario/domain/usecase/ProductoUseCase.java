@@ -1,5 +1,6 @@
 package com.Arka.MSInventario.domain.usecase;
 
+import com.Arka.MSInventario.application.dto.ProductCartDto;
 import com.Arka.MSInventario.application.dto.ProductoDTO;
 import com.Arka.MSInventario.application.dto.ProductoUpdateDTO;
 import com.Arka.MSInventario.domain.model.Categoria;
@@ -85,11 +86,12 @@ public class ProductoUseCase {
         if (productoExistente.isEmpty()) {
             throw new Exception("El producto no existe.");
         }
-
+            // 1. APLICAR LOS CAMBIOS DEL DTO AL OBJETO EXISTENTE   
         Producto productoUpdate = productoExistente.get();
+        // Guardar el stock anterior para el historial
         int stockAnterior = productoUpdate.getStock();
 
-// Si el DTO trae un nuevo nombre, lo actualiza.
+        // Si el DTO trae un nuevo nombre, lo actualiza.
         if (productoUpdateDTO.getNombre() != null) {
             productoUpdate.setNombre(productoUpdateDTO.getNombre());
         }
@@ -176,6 +178,19 @@ public class ProductoUseCase {
         return productos.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    public ProductCartDto obtenerStockPriceProducto(Long id) {
+        Optional<Producto> producto = productoGateway.buscarPorId(id);
+        if (producto.isEmpty()) {
+            throw new Exception("El producto no existe.");
+        }
+        return new ProductCartDto(
+                producto.get().getNombre(),
+                producto.get().getDescripcion(),
+                producto.get().getStock(),
+                producto.get().getPrecio()
+        );
     }
 
 //    private ProductoClienteDTO toClienteDTO(Producto producto) {

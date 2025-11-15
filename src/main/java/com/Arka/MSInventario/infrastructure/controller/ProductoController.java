@@ -1,5 +1,6 @@
 package com.Arka.MSInventario.infrastructure.controller;
 
+import com.Arka.MSInventario.application.dto.ProductCartDto;
 import com.Arka.MSInventario.application.dto.ProductoDTO;
 import com.Arka.MSInventario.application.dto.ProductoUpdateDTO;
 import com.Arka.MSInventario.domain.model.Producto;
@@ -58,6 +59,17 @@ public class ProductoController {
         try {
             List<ProductoDTO> productoDTO = productoUseCase.buscarProductosDTO(nombre);
             return ResponseEntity.ok(productoDTO);
+        }
+        catch (Exception e){
+            return ResponseEntity.status(500).body("Error interno..." + e.getMessage());
+        }
+    }
+
+    @GetMapping("/stockprice/{id}")
+    public ResponseEntity<Object> obtenerStockPriceProducto(@PathVariable Long id){
+        try {
+            ProductCartDto stockPrice = productoUseCase.obtenerStockPriceProducto(id);
+            return ResponseEntity.ok(stockPrice);
         }
         catch (Exception e){
             return ResponseEntity.status(500).body("Error interno..." + e.getMessage());
