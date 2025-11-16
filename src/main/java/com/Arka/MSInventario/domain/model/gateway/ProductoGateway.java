@@ -5,24 +5,13 @@ import com.Arka.MSInventario.domain.model.Producto;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Interfaz para el acceso y manipulación de productos en el sistema.
- */
 public interface ProductoGateway {
-    /**
-     * Guarda un producto en el sistema.
-     * @param producto el producto a guardar
-     * @return el producto guardado
-     */
-    Producto saveProductos(Producto producto);
 
-    /**
-     * Busca un producto por su nombre.
-     * @param nombre el nombre del producto a buscar
-     * @return un Optional que contiene el producto si se encuentra, o vacío si no
-     */
+    Producto saveProductos(Producto producto);
     Optional<Producto> buscarPorNombre(String nombre);
     List<Producto> findAll();
     List<Producto> buscarProductos(String nombre);
     Optional<Producto> buscarPorId(Long id);
+    // Nuevo método para verificar si existen productos por categoría
+    boolean existenProductosPorCategoria(Long categoriaId);
 }

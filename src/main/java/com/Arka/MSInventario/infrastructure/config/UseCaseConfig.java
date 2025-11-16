@@ -1,5 +1,6 @@
 package com.Arka.MSInventario.infrastructure.config;
 
+import com.Arka.MSInventario.application.mapper.CategoriaMapper;
 import com.Arka.MSInventario.application.mapper.ProductoMapper;
 import com.Arka.MSInventario.application.service.CategoriaValidationService;
 import com.Arka.MSInventario.application.service.ProductoValidationService;
@@ -20,14 +21,21 @@ public class UseCaseConfig {
     }
 
     @Bean
+    public CategoriaMapper categoriaMapper() {
+        return new CategoriaMapper();
+    }
+
+    @Bean
     public ProductoValidationService productoValidationService(
             ProductoGateway productoGateway,
             CategoriaGateway categoriaGateway) {
         return new ProductoValidationService(productoGateway, categoriaGateway);
     }
 
-    @Bean CategoriaValidationService categoriaValidationService(CategoriaGateway categoriaGateway) {
-        return new CategoriaValidationService(categoriaGateway);
+    @Bean CategoriaValidationService categoriaValidationService(
+            CategoriaGateway categoriaGateway,
+            ProductoGateway productoGateway) {
+        return new CategoriaValidationService(categoriaGateway, productoGateway);
     }
 
     @Bean

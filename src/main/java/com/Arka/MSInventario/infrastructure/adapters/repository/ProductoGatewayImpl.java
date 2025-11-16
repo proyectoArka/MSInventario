@@ -68,4 +68,9 @@ public class ProductoGatewayImpl implements ProductoGateway {
         return productoRepository.findById(id)
                 .map(ProductoEntity::toDomain);
     }
+
+    @Override
+    public boolean existenProductosPorCategoria(Long categoriaId) {
+        return productoRepository.existsByCategoria_Id(categoriaId);
+    }
 }
