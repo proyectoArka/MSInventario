@@ -129,4 +129,32 @@ public class ProductoUseCase {
         historial.setCantidad_nueva(cantidadNueva);
         historialStockGateway.saveHistorialStock(historial);
     }
+
+    // Da de baja lógica a un producto
+    public Producto darDeBajaProducto(Long id) {
+        // Validar que el producto existe
+        productoGateway.buscarPorId(id)
+                .orElseThrow(() -> new ProductoNoEncontradoException(id));
+
+        // Dar de baja el producto
+        return productoGateway.darDeBajaProducto(id);
+    }
+
+    // Obtiene el historial de cambios de stock de un producto
+    public List<HistorialStock> obtenerHistorialStockPorProducto(Long productoId) {
+        // Validar que el producto existe
+        productoGateway.buscarPorId(productoId)
+                .orElseThrow(() -> new ProductoNoEncontradoException(productoId));
+
+        // Obtener el historial de stock
+        return historialStockGateway.obtenerHistorialPorProducto(productoId);
+    }
+
+    // Obtiene todos los productos activos con stock bajo o igual al umbral
+    public List<ProductoDTO> obtenerProductosConStockBajo() {
+        return productoGateway.obtenerProductosConStockBajo()
+                .stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }

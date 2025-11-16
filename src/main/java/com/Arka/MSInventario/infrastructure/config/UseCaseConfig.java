@@ -1,6 +1,7 @@
 package com.Arka.MSInventario.infrastructure.config;
 
 import com.Arka.MSInventario.application.mapper.CategoriaMapper;
+import com.Arka.MSInventario.application.mapper.HistorialStockMapper;
 import com.Arka.MSInventario.application.mapper.ProductoMapper;
 import com.Arka.MSInventario.application.service.CategoriaValidationService;
 import com.Arka.MSInventario.application.service.ProductoValidationService;
@@ -23,6 +24,11 @@ public class UseCaseConfig {
     @Bean
     public CategoriaMapper categoriaMapper() {
         return new CategoriaMapper();
+    }
+
+    @Bean
+    public HistorialStockMapper historialStockMapper() {
+        return new HistorialStockMapper();
     }
 
     @Bean

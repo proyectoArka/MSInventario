@@ -14,4 +14,17 @@ public interface ProductoGateway {
     Optional<Producto> buscarPorId(Long id);
     // Nuevo método para verificar si existen productos por categoría
     boolean existenProductosPorCategoria(Long categoriaId);
+
+    /**
+     * Da de baja lógica a un producto cambiando el campo isDelete a true.
+     * @param id el ID del producto
+     * @return el producto dado de baja
+     */
+    Producto darDeBajaProducto(Long id);
+
+    /**
+     * Obtiene todos los productos activos cuyo stock está por debajo o igual al umbral de stock bajo.
+     * @return lista de productos con stock bajo
+     */
+    List<Producto> obtenerProductosConStockBajo();
 }

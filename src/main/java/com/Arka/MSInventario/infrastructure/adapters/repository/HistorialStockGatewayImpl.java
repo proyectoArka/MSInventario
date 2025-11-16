@@ -7,6 +7,9 @@ import com.Arka.MSInventario.infrastructure.adapters.entity.ProductoEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 @RequiredArgsConstructor
 public class HistorialStockGatewayImpl implements HistorialStockGateway {
@@ -19,5 +22,13 @@ public class HistorialStockGatewayImpl implements HistorialStockGateway {
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: "));
         HistorialStockEntity entity = new HistorialStockEntity(historialStock, productoEntity);
         return historialStockRepository.save(entity).toDomain();
+    }
+
+    @Override
+    public List<HistorialStock> obtenerHistorialPorProducto(Long productoId) {
+        return historialStockRepository.findByProductoIdOrderByFechaCambioDesc(productoId)
+                .stream()
+                .map(HistorialStockEntity::toDomain)
+                .collect(Collectors.toList());
     }
 }

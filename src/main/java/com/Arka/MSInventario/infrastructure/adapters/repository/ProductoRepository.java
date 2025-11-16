@@ -2,6 +2,7 @@ package com.Arka.MSInventario.infrastructure.adapters.repository;
 
 import com.Arka.MSInventario.infrastructure.adapters.entity.ProductoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,4 +14,7 @@ public interface ProductoRepository extends JpaRepository<ProductoEntity, Long> 
     List<ProductoEntity> findByCategoria_Id(Long categoriaId);
     Optional<ProductoEntity> findById(Long id);
     boolean existsByCategoria_Id(Long categoriaId);
+
+    @Query("SELECT p FROM ProductoEntity p WHERE p.stock <= p.UmbralStockBajo AND p.isDelete = false")
+    List<ProductoEntity> findProductosConStockBajo();
 }

@@ -1,5 +1,6 @@
 package com.Arka.MSInventario.infrastructure.adapters.repository;
 
+import com.Arka.MSInventario.domain.exception.ProductoNoEncontradoException;
 import com.Arka.MSInventario.domain.model.Producto;
 import com.Arka.MSInventario.domain.model.gateway.ProductoGateway;
 import com.Arka.MSInventario.infrastructure.adapters.entity.CategoriaEntity;
@@ -72,5 +73,23 @@ public class ProductoGatewayImpl implements ProductoGateway {
     @Override
     public boolean existenProductosPorCategoria(Long categoriaId) {
         return productoRepository.existsByCategoria_Id(categoriaId);
+    }
+
+    @Override
+    public Producto darDeBajaProducto(Long id) {
+        ProductoEntity entity = productoRepository.findById(id)
+                .orElseThrow(() -> new ProductoNoEncontradoException(id));
+
+        entity.setDelete(true);
+
+        return productoRepository.save(entity).toDomain();
+    }
+
+    @Override
+    public List<Producto> obtenerProductosConStockBajo() {
+        return productoRepository.findProductosConStockBajo()
+                .stream()
+                .map(ProductoEntity::toDomain)
+                .toList();
     }
 }

@@ -1,8 +1,10 @@
 package com.Arka.MSInventario.infrastructure.controller;
 
+import com.Arka.MSInventario.application.dto.HistorialStockDTO;
 import com.Arka.MSInventario.application.dto.ProductCartDto;
 import com.Arka.MSInventario.application.dto.ProductoDTO;
 import com.Arka.MSInventario.application.dto.ProductoUpdateDTO;
+import com.Arka.MSInventario.application.mapper.HistorialStockMapper;
 import com.Arka.MSInventario.domain.model.Producto;
 import com.Arka.MSInventario.domain.usecase.ProductoUseCase;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/productos")
@@ -26,6 +29,7 @@ import java.util.Optional;
 public class ProductoController {
     
     private final ProductoUseCase productoUseCase;
+    private final HistorialStockMapper historialStockMapper;
 
     @Operation(
             summary = "Crear un nuevo producto",
@@ -214,6 +218,121 @@ public class ProductoController {
             return ResponseEntity.ok(stockPrice);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error interno..." + e.getMessage());
+        }
+    }
+
+    @Operation(
+            summary = "Dar de baja un producto",
+            description = "Realiza una baja lógica del producto cambiando el campo isDelete a true. El producto no se elimina físicamente de la base de datos"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Producto dado de baja exitosamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Producto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Producto no encontrado con el ID proporcionado",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
+    @PatchMapping("/baja/{id}")
+    public ResponseEntity<Object> darDeBajaProducto(
+            @Parameter(description = "ID del producto a dar de baja", required = true, example = "1")
+            @PathVariable Long id) {
+        try {
+            Producto productoBaja = productoUseCase.darDeBajaProducto(id);
+            return ResponseEntity.ok(productoBaja);
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @Operation(
+            summary = "Obtener historial de cambios de stock",
+            description = "Obtiene el historial completo de cambios de stock de un producto específico, ordenado del más reciente al más antiguo. Muestra la fecha de cada cambio y la cantidad actualizada"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Historial obtenido exitosamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = HistorialStockDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "El producto no tiene historial de cambios de stock",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Producto no encontrado con el ID proporcionado",
+                    content = @Content(mediaType = "application/json")
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
+    @GetMapping("/historial-stock/{id}")
+    public ResponseEntity<Object> obtenerHistorialStock(
+            @Parameter(description = "ID del producto", required = true, example = "1")
+            @PathVariable Long id) {
+        try {
+            List<HistorialStockDTO> historial = productoUseCase.obtenerHistorialStockPorProducto(id)
+                    .stream()
+                    .map(historialStockMapper::toDTO)
+                    .collect(Collectors.toList());
+
+            if (historial.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+
+            return ResponseEntity.ok(historial);
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
+
+    @Operation(
+            summary = "Obtener productos con stock bajo",
+            description = "Retorna todos los productos activos cuyo stock actual está por debajo o igual al umbral de stock bajo configurado. Útil para identificar productos que requieren reabastecimiento"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Lista de productos con stock bajo obtenida exitosamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductoDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "No hay productos con stock bajo",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Error interno del servidor",
+                    content = @Content(mediaType = "application/json")
+            )
+    })
+    @GetMapping("/stock-bajo")
+    public ResponseEntity<Object> obtenerProductosConStockBajo() {
+        try {
+            List<ProductoDTO> productos = productoUseCase.obtenerProductosConStockBajo();
+
+            if (productos.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+
+            return ResponseEntity.ok(productos);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener productos con stock bajo: " + e.getMessage());
         }
     }
 }

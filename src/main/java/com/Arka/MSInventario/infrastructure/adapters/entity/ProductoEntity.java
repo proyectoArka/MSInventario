@@ -44,6 +44,9 @@ public class ProductoEntity {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean isDelete;
+
     @OneToMany(mappedBy = "IdProducto", cascade = CascadeType.ALL)
     private List<HistorialStockEntity> historialStock;
 
@@ -62,6 +65,7 @@ public class ProductoEntity {
         this.categoria = categoriaEntity;
         this.UmbralStockBajo = producto.getUmbralStockBajo();
         this.createdAt = producto.getCreatedAt();
+        this.isDelete = producto.isDelete();
     }
 
     // Metodo para convertir una entidad ProductoEntity a un objeto de dominio Producto
@@ -74,6 +78,7 @@ public class ProductoEntity {
                 stock,
                 categoria != null ? categoria.getId() : null,
                 UmbralStockBajo,
-                createdAt);
+                createdAt,
+                isDelete);
     }
 }

@@ -22,6 +22,7 @@ public class Producto {
     private Long categoria;
     private int umbralStockBajo;
     private LocalDateTime createdAt;
+    private boolean isDelete;
 
     // valida que el nombre no sea nulo ni vacio y que no supere los 50 caracteres
     public void validarNombre() {
