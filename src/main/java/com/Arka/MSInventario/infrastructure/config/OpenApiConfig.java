@@ -1,7 +1,6 @@
 package com.Arka.MSInventario.infrastructure.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
@@ -29,8 +28,10 @@ public class OpenApiConfig {
                 .servers(List.of(
                         new Server()
                                 .url("http://localhost:8080")
-                                .description("Servidor de Desarrollo")
+                                .description("Servidor de Desarrollo"),
+                        new Server()
+                                .url("http://localhost:8093")
+                                .description("API Gateway")
                 ));
     }
 }
-
