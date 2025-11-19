@@ -41,14 +41,14 @@ class CategoriaUseCaseTest {
     @Test
     @DisplayName("Debería guardar una categoría exitosamente")
     void deberiaSaveCategoriaExitosamente() {
-        // Given
+        // Preparación 
         doNothing().when(validationService).validationCategoria(any(Categoria.class));
         when(categoriaGateway.saveCategoria(any(Categoria.class))).thenReturn(categoria);
 
-        // When
+        // Ejecución 
         Categoria resultado = categoriaUseCase.saveCategoria(categoria);
 
-        // Then
+        // Verificación 
         assertNotNull(resultado);
         assertEquals("Electrónica", resultado.getNombre());
         verify(validationService).validationCategoria(categoria);

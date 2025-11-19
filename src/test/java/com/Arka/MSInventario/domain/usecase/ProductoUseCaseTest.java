@@ -77,17 +77,17 @@ class ProductoUseCaseTest {
     @Test
     @DisplayName("Debería guardar un producto exitosamente")
     void deberiaSaveProductoExitosamente() {
-        // Given
+        // Preparación 
         HistorialStock historial = new HistorialStock();
 
         doNothing().when(validationService).validarNuevoProducto(any(Producto.class));
         when(productoGateway.saveProductos(any(Producto.class))).thenReturn(producto);
         when(historialStockGateway.saveHistorialStock(any(HistorialStock.class))).thenReturn(historial);
 
-        // When
+        // Ejecución
         Producto resultado = productoUseCase.saveProducto(producto);
 
-        // Then
+        // Verificación
         assertNotNull(resultado);
         assertEquals("Laptop", resultado.getNombre());
         verify(validationService).validarNuevoProducto(producto);
